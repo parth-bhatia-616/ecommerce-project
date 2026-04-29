@@ -1,0 +1,6 @@
+servlets/AddToCartServlet.class
+servlets/LoginServlet.class
+App.class
+servlets/DBConnection.class
+servlets/LogoutServlet.class
+servlets/RegistrationServlet.class
