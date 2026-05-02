@@ -118,7 +118,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     sort: '-createdAt'
   });
 
-  // Initialize user from localStorage
+  // Initialize user and wishlist from localStorage
   useEffect(() => {
     const storedUser = localStorage.getItem('vertexUser');
     if (storedUser) {
@@ -129,7 +129,26 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         localStorage.removeItem('vertexUser');
       }
     }
+
+    const storedWishlist = localStorage.getItem('vertexWishlist');
+    if (storedWishlist) {
+      try {
+        setWishlist(JSON.parse(storedWishlist));
+      } catch (error) {
+        console.error('Failed to parse stored wishlist:', error);
+        localStorage.removeItem('vertexWishlist');
+      }
+    }
   }, []);
+
+  // Persist wishlist to localStorage
+  useEffect(() => {
+    if (wishlist.length > 0) {
+      localStorage.setItem('vertexWishlist', JSON.stringify(wishlist));
+    } else {
+      localStorage.removeItem('vertexWishlist');
+    }
+  }, [wishlist]);
 
   // Fetch products
   const fetchProducts = async (params?: any) => {
@@ -227,6 +246,10 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       // This would be implemented when we have the usersAPI
       // await usersAPI.addToWishlist(productId);
+      const product = products.find(p => p._id === productId);
+      if (product && !wishlist.some(p => p._id === productId)) {
+        setWishlist(prev => [...prev, product]);
+      }
       console.log('Added to wishlist:', productId);
     } catch (error: any) {
       console.error('Add to wishlist error:', error);
@@ -240,6 +263,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     try {
       // This would be implemented when we have the usersAPI
       // await usersAPI.removeFromWishlist(productId);
+      setWishlist(prev => prev.filter(p => p._id !== productId));
       console.log('Removed from wishlist:', productId);
     } catch (error: any) {
       console.error('Remove from wishlist error:', error);

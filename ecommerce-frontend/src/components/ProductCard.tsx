@@ -20,8 +20,14 @@ interface ProductCardProps {
   };
 }
 
+const HeartIcon = ({ filled }: { filled?: boolean }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill={filled ? "#ef4444" : "none"} stroke={filled ? "#ef4444" : "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+  </svg>
+);
+
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart, cartLoading, user } = useApp();
+  const { addToCart, cartLoading, user, wishlist, addToWishlist, removeFromWishlist } = useApp();
   const [isHovered, setIsHovered] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -47,6 +53,24 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       setAddingToCart(false);
     }
   };
+
+  const handleWishlistToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      alert('Please login to use wishlist');
+      return;
+    }
+    
+    const isWishlisted = wishlist.some(p => p._id === product._id);
+    if (isWishlisted) {
+      await removeFromWishlist(product._id);
+    } else {
+      await addToWishlist(product._id);
+    }
+  };
+
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -119,19 +143,28 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           
           <div className="product-price-row">
             <div className="product-price">₹{product.price.toFixed(2)}</div>
-            <button
-              className={`add-to-cart-btn ${isHovered ? 'visible' : ''}`}
-              onClick={handleAddToCart}
-              disabled={addingToCart || cartLoading || product.stock === 0}
-            >
-              {addingToCart || cartLoading ? (
-                <span className="loading-spinner">Adding...</span>
-              ) : product.stock === 0 ? (
-                'Out of Stock'
-              ) : (
-                'Add to Cart'
-              )}
-            </button>
+            <div className="product-actions-group">
+              <button 
+                className={`wishlist-btn ${wishlist.some(p => p._id === product._id) ? 'active' : ''} ${isHovered ? 'visible' : ''}`}
+                onClick={handleWishlistToggle}
+                title="Add to Wishlist"
+              >
+                <HeartIcon filled={wishlist.some(p => p._id === product._id)} />
+              </button>
+              <button
+                className={`add-to-cart-btn ${isHovered ? 'visible' : ''}`}
+                onClick={handleAddToCart}
+                disabled={addingToCart || cartLoading || product.stock === 0}
+              >
+                {addingToCart || cartLoading ? (
+                  <span className="loading-spinner">Adding...</span>
+                ) : product.stock === 0 ? (
+                  'Out of Stock'
+                ) : (
+                  'Add to Cart'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </Link>
