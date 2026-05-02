@@ -1,0 +1,14 @@
+{
+  "name": "vertex-ecommerce-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install-all": "npm install && cd ecommerce-frontend && npm install && cd ../ecommerce-backend && npm install",
+    "build-frontend": "cd ecommerce-frontend && npm run build",
+    "start-backend": "cd ecommerce-backend && npm start",
+    "dev": "concurrently \"npm run start-backend\" \"cd ecommerce-frontend && npm start\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.1"
+  }
+}
